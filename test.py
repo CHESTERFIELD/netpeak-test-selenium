@@ -36,7 +36,7 @@ def to_fill_select_by_name(driver, name, min, max):
     select.select_by_index(random.randint(min, max))
 
 
-def check_title_assert_func(exp1, exp2):
+def check_title_assert_func(driver, exp1, exp2):
     assert exp1 in driver.title , exp2
 
 
@@ -47,13 +47,13 @@ def func():
         # driver = webdriver.Chrome()
 
         driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-        driver.implicitly_wait(20)
+        driver.implicitly_wait(2)
 
 
         driver.get(host)
 
-        check_title_assert_func("Раскрутка сайта, продвижение сайтов: Netpeak Украина — интернет-маркетинг для бизнеса", \
-        "Not find 'Раскрутка сайта, продвижение сайтов: Netpeak Украина — интернет-маркетинг для бизнеса'")
+        check_title_assert_func(driver, "Раскрутка сайта", \
+        "Not find 'Раскрутка сайта'")
 
         # xpath to element "a" with attr href 'https://career.netpeak.ua/'
         career_element_button = driver.find_element_by_xpath(
@@ -62,8 +62,8 @@ def func():
 
         career_element_button.click()
 
-        check_title_assert_func("Работа в Netpeak: обращение руководителя, видео и презентация о карьере в Нетпик Украина", \
-        "Not find 'Работа в Netpeak: обращение руководителя, видео и презентация о карьере в Нетпик Украина'")
+        check_title_assert_func(driver, "Работа в Netpeak", \
+        "Not find 'Работа в Netpeak'")
 
         # copy xpath in browsers
         work_in_netpeak_button = driver.find_element_by_xpath(
@@ -71,16 +71,17 @@ def func():
                             )
         work_in_netpeak_button.click()
 
-        check_title_assert_func("Заполнение анкеты на вакансию — Netpeak Украина", \
-        "Not find 'Заполнение анкеты на вакансию — Netpeak Украина'")
+        check_title_assert_func(driver, "Заполнение анкеты", \
+        "Not find 'Заполнение анкеты'")
 
         # upload incorrect cv
         input_field = driver.find_element_by_xpath("/html/body/input")
         input_field.send_keys(os.getcwd() + "/example.png")
 
         # time.sleep(20)
-        element_p = WebDriverWait(driver, 60).until( \
-            EC.text_to_be_present_in_element((By.XPATH, "/html/body/form/div[1]/div/div[1]/div[8]/div[2]/label"), \
+        element = WebDriverWait(driver, 60).until( \
+            EC.text_to_be_present_in_element((By.XPATH, \
+            "/html/body/form/div[1]/div/div[1]/div[8]/div[2]/label"), \
             "Ошибка: неверный формат файла (разрешённые форматы: doc, docx, pdf, txt, odt, rtf)." ))
 
         # to fill first_name
@@ -105,21 +106,25 @@ def func():
         element_p = driver.find_element_by_xpath("/html/body/div[2]/div/p")
         color = element_p.value_of_css_property('color')
 
-        assert str(color) == "rgb(255, 0, 0)", "Element 'Все поля являются обязательными для заполнения' is not red."
+        assert str(color) == "rgb(255, 0, 0)", "Element 'Все поля \
+        являются обязательными для заполнения' is not red."
 
 
         driver.find_element_by_xpath("//img[@alt='Netpeak']").click()
 
-        assert WebDriverWait(driver, 1).until(EC.url_to_be(host)), "You are not on landing page."
+        assert WebDriverWait(driver, 1).until(EC.url_to_be(host)), \
+        "You are not on landing page."
+
+        print("The test was successful.")
 
     except TimeoutException:
-        print("Element 'Ошибка: неверный формат файла (разрешённые форматы: doc, docx, pdf, txt, odt, rtf).' not found.")
+        print("Element 'Ошибка: неверный формат файла (разрешённые форматы: \
+        doc, docx, pdf, txt, odt, rtf).' not found.")
 
     finally:
         driver.close()
         driver.quit()
         logging.info('Application - End')
-        print("The test was successful.")
 
 
 func()
